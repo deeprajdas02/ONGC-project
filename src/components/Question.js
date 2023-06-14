@@ -1,4 +1,4 @@
-import { React, useRef, useState } from "react";
+import { React, useRef, useState, useEffect } from "react";
 import { questionArray as questionsArray } from "../utils/questionsDataset";
 
 function Question() {
@@ -7,23 +7,45 @@ function Question() {
 
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [questionArray, setQuestionArray] = useState(questionsArray);
-  const [isVisited, setIsVisited] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  // const [isAnswerSaved, setIsAnswerSaved] = useState(false);
+
+  // const [isVisited, setIsVisited] = useState(false);
+  // const updatedQuestions = useRef([]);
+
+  const makeVisited = (indexOfButton) => {
+    const updatedQuestionsArray = [...questionArray];
+    updatedQuestionsArray[indexOfButton].isVisited = true;
+    setQuestionArray(updatedQuestionsArray);
+  };
+  useEffect(() => {
+    // Side effect goes here
+    makeVisited(0);
+    // Optional clean-up function
+    return () => {};
+  }, []);
 
   const buttons = Array.from({ length: 20 }, (_, i) => i + 1);
 
   const renderButton = (buttonNumber) => {
-    const isVisited = false;
+    const isVisited = questionArray[buttonNumber - 1].isVisited;
+    const isAnswered = questionArray[buttonNumber - 1].usersResponse;
     let buttonStyle = questionButtonClass;
-    if (isVisited) {
+    if(isAnswered !== null) {
       buttonStyle += " bg-green-400";
-    } else {
+    }
+    else if (isVisited) {
+      buttonStyle += " bg-yellow-400";
+    } 
+    else {
       buttonStyle += " bg-gray-400";
     }
-    console.log(questionArray[buttonNumber]);
     return (
       <div
         className={buttonStyle}
         onClick={() => {
+          setSelectedAnswer(null);
+          makeVisited(buttonNumber - 1);
           setActiveQuestion(buttonNumber - 1);
         }}
       >
@@ -39,6 +61,29 @@ function Question() {
       </div>
     );
   };
+
+  const answerSelected = (buttonNumber) => {
+    setSelectedAnswer(buttonNumber);
+  }
+
+  const saveAnswer = () => {
+    if (selectedAnswer === null) {
+      alert("No answer selected")
+      return;
+    }
+    const updatedQuestionsArray = [...questionArray];
+    updatedQuestionsArray[activeQuestion].usersResponse = selectedAnswer;
+    setQuestionArray(updatedQuestionsArray);
+    // setIsAnswerSaved(true);
+  }
+  
+  const clearAnswer = () => {
+    setSelectedAnswer(null);
+    const updatedQuestionsArray = [...questionArray];
+    updatedQuestionsArray[activeQuestion].usersResponse = null;
+    setQuestionArray(updatedQuestionsArray);
+    // setIsAnswerSaved(false);
+  }
 
   return (
     <div className="flex">
@@ -56,18 +101,30 @@ function Question() {
 
           <div className="flex-column w-full mt-20">
             <div className="flex justify-center">
-              <div className="border-solid border-2 flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white">
+              <div className="border-solid border-2 flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white"
+              onClick={()=>{
+                answerSelected(0)
+              }}>
                 {questionArray[activeQuestion].options[0]}
               </div>
-              <div className="border-solid border-2  flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white">
+              <div className="border-solid border-2  flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white"
+              onClick={()=>{
+                answerSelected(1)
+              }}>
                 {questionArray[activeQuestion].options[1]}
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="border-solid border-2 flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white">
+              <div className="border-solid border-2 flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white"
+              onClick={()=>{
+                answerSelected(2)
+              }}>
                 {questionArray[activeQuestion].options[2]}
               </div>
-              <div className="border-solid border-2 flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white">
+              <div className="border-solid border-2 flex items-center justify-center bg-gray-200 font-bold text-2xl border-black w-[550px] h-16 rounded-lg m-4 cursor-pointer hover:bg-slate-950 hover:text-white"
+              onClick={()=>{
+                answerSelected(3)
+              }}>
                 {questionArray[activeQuestion].options[3]}
               </div>
             </div>
@@ -77,6 +134,7 @@ function Question() {
           <button
             type="button"
             className=" m-2 inline-block rounded font-bold bg-success w-[10vw] pb-2 pt-2.5 lg:text-2xl sm:text-sm uppercase leading-normal text-white transition duration-150 ease-in-out hover:bg-green-800 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] shadow-xl shadow-black"
+            onClick={saveAnswer}
           >
             Save
           </button>
@@ -84,6 +142,8 @@ function Question() {
             type="button"
             className=" m-2 inline-block rounded bg-primary w-[10vw] pb-2 pt-2.5 lg:text-2xl sm:text-sm  font-bold uppercase leading-normal text-white transition duration-150 ease-in-out hover:bg-primary-800 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] shadow-xl shadow-black"
             onClick={() => {
+              setSelectedAnswer(null);
+              makeVisited(activeQuestion + 1);
               setActiveQuestion(activeQuestion + 1);
             }}
           >
@@ -92,6 +152,9 @@ function Question() {
           <button
             type="button"
             className=" m-2 inline-block rounded bg-danger w-[10vw] pb-2 pt-2.5 lg:text-2xl sm:text-sm  font-bold uppercase leading-normal text-white transition duration-150 ease-in-out hover:bg-red-800 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] shadow-xl shadow-black"
+            onClick={() => {
+              clearAnswer(activeQuestion);
+            }}
           >
             Clear
           </button>
@@ -108,10 +171,10 @@ function Question() {
               <div className=" h-[40px] w-[40px] bg-green-800 rounded-full m-2"></div>
               <p className="lg:text-xl sm:text-xs xs:text-xs">Answered</p>
             </div>
-            <div className="m-4 p-2 lg:h-[6vh] lg:w-[13vw] bg-neutral-100 flex items-center rounded-xl ">
+            {/* <div className="m-4 p-2 lg:h-[6vh] lg:w-[13vw] bg-neutral-100 flex items-center rounded-xl ">
               <div className=" h-[40px] w-[40px] bg-red-800 rounded-full m-2"></div>
               <p className="lg:text-xl sm:text-xs xs:text-xs">Not-Answered</p>
-            </div>
+            </div> */}
             <div className="m-4 p-2 lg:h-[6vh] lg:w-[13vw] bg-neutral-100 flex items-center rounded-xl mb">
               <div className=" h-[40px] w-[40px] bg-gray-400 rounded-full m-2"></div>
               <p className="lg:text-xl sm:text-xs xs:text-xs">Not-Visited</p>
@@ -122,7 +185,7 @@ function Question() {
           <div className="flex-column mt-28">
             {renderRow(0)}
             {renderRow(5)}
-            {renderRow(10)} 
+            {renderRow(10)}
             {renderRow(15)}
           </div>
         </div>
